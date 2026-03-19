@@ -2,11 +2,11 @@ name: Test Automation & Report Generation
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   schedule:
-    - cron: '0 18 * * *'
+    - cron: "0 18 * * *"
 
 permissions:
   contents: read
@@ -23,144 +23,144 @@ jobs:
     name: Run Tests & Generate Reports
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18.x'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.x"
+          cache: "npm"
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Install Playwright browsers
-      run: npx playwright install --with-deps
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
 
-    - name: Run tests
-      run: npm run test:ci
-      continue-on-error: true
+      - name: Run tests
+        run: npm run test:ci
+        continue-on-error: true
 
-    - name: Generate Cucumber HTML reports
-      if: always()
-      run: npm run report:generate
+      - name: Generate Cucumber HTML reports
+        if: always()
+        run: npm run report:generate
 
-    - name: Persist JSON reports to history branch
-      if: always()
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        set -e
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        
-        # Fetch history branch if exists
-        git fetch origin reports-history || true
-        if git show-ref --verify --quiet refs/heads/reports-history; then
-          git checkout reports-history
-        else
-          git checkout --orphan reports-history
-          git rm -rf . || true
-        fi
-        
-        # Create timestamp directory and copy reports
-        mkdir -p reports/history
-        ts=$(date -u +"%Y%m%d-%H%M%S")
-        mkdir -p "reports/history/$ts"
-        cp -r reports/json/*.json "reports/history/$ts/" || true
-        
-        # Keep only last 10 runs
-        if [ -d reports/history ]; then
-          ls -1t reports/history | tail -n +11 | xargs -r -I{} rm -rf "reports/history/{}"
-        fi
-        
-        git add reports/history || true
-        git commit -m "Add test reports - $ts" || echo "No changes to commit"
-        git push origin reports-history --force
+      - name: Persist JSON reports to history branch
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-    - name: Generate dashboard from history
-      if: always()
-      run: |
-        git checkout main || git checkout master || true
-        npm ci --no-audit --no-fund --silent || true
-        node scripts/generate-dashboard.js || echo "Dashboard generation skipped"
+          # Fetch history branch if exists
+          git fetch origin reports-history || true
+          if git show-ref --verify --quiet refs/heads/reports-history; then
+            git checkout reports-history
+          else
+            git checkout --orphan reports-history
+            git rm -rf . || true
+          fi
 
-    - name: Prepare GitHub Pages artifact
-      if: always()
-      run: |
-        mkdir -p gh-pages
-        
-        # Copy multiple-cucumber-html report
-        if [ -d "reports/html/multiple-cucumber-html-reporter" ]; then
-          cp -r reports/html/multiple-cucumber-html-reporter/* gh-pages/ || true
-        fi
-        
-        # Copy dashboard if available
-        if [ -d "dashboard" ]; then
-          mkdir -p gh-pages/dashboard
-          cp -r dashboard/* gh-pages/dashboard/ || true
-        fi
-        
-        # Create index.html if multiple-cucumber-html report doesn't have one
-        if [ ! -f "gh-pages/index.html" ]; then
-          cat > gh-pages/index.html << 'EOF'
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Test Reports</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 40px; }
-            .container { max-width: 800px; margin: 0 auto; }
-            h1 { color: #333; }
-            .report-links { margin-top: 20px; }
-            a { display: block; margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px; text-decoration: none; color: #0066cc; }
-            a:hover { background: #e0e0e0; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h1>Test Reports</h1>
-            <div class="report-links">
-              <a href="./index.html">📊 Cucumber Test Report</a>
-              <a href="./dashboard/">📈 Dashboard (Last 10 Runs)</a>
+          # Create timestamp directory and copy reports
+          mkdir -p reports/history
+          ts=$(date -u +"%Y%m%d-%H%M%S")
+          mkdir -p "reports/history/$ts"
+          cp -r reports/json/*.json "reports/history/$ts/" || true
+
+          # Keep only last 10 runs
+          if [ -d reports/history ]; then
+            ls -1t reports/history | tail -n +11 | xargs -r -I{} rm -rf "reports/history/{}"
+          fi
+
+          git add reports/history || true
+          git commit -m "Add test reports - $ts" || echo "No changes to commit"
+          git push origin reports-history --force
+
+      - name: Generate dashboard from history
+        if: always()
+        run: |
+          git checkout main || git checkout master || true
+          npm ci --no-audit --no-fund --silent || true
+          node scripts/generate-dashboard.js || echo "Dashboard generation skipped"
+
+      - name: Prepare GitHub Pages artifact
+        if: always()
+        run: |
+          mkdir -p gh-pages
+
+          # Copy multiple-cucumber-html report
+          if [ -d "reports/html/multiple-cucumber-html-reporter" ]; then
+            cp -r reports/html/multiple-cucumber-html-reporter/* gh-pages/ || true
+          fi
+
+          # Copy dashboard if available
+          if [ -d "dashboard" ]; then
+            mkdir -p gh-pages/dashboard
+            cp -r dashboard/* gh-pages/dashboard/ || true
+          fi
+
+          # Create index.html if multiple-cucumber-html report doesn't have one
+          if [ ! -f "gh-pages/index.html" ]; then
+            cat > gh-pages/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Test Reports</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; }
+              .container { max-width: 800px; margin: 0 auto; }
+              h1 { color: #333; }
+              .report-links { margin-top: 20px; }
+              a { display: block; margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px; text-decoration: none; color: #0066cc; }
+              a:hover { background: #e0e0e0; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>Test Reports</h1>
+              <div class="report-links">
+                <a href="./index.html">📊 Cucumber Test Report</a>
+                <a href="./dashboard/">📈 Dashboard (Last 10 Runs)</a>
+              </div>
             </div>
-          </div>
-        </body>
-        </html>
-        EOF
-        fi
+          </body>
+          </html>
+          EOF
+          fi
 
-    - name: Upload artifact for GitHub Pages
-      if: always()
-      uses: actions/upload-pages-artifact@v2
-      with:
-        path: gh-pages
+      - name: Upload artifact for GitHub Pages
+        if: always()
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: gh-pages
 
-    - name: Deploy reports to GitHub Pages
-      if: always()
-      id: deployment
-      uses: actions/deploy-pages@v2
+      - name: Deploy reports to GitHub Pages
+        if: always()
+        id: deployment
+        uses: actions/deploy-pages@v2
 
-    - name: Upload test reports
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-test-reports
-        path: reports/
-        retention-days: 30
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-reports
+          path: reports/
+          retention-days: 30
 
-    - name: Test Results Summary
-      if: always()
-      run: |
-        echo "## ✅ Test Automation Workflow Completed" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### 📊 Reports Generated:" >> $GITHUB_STEP_SUMMARY
-        echo "- Cucumber HTML Report" >> $GITHUB_STEP_SUMMARY
-        echo "- Test Dashboard (Last 10 runs)" >> $GITHUB_STEP_SUMMARY
-        echo "- JSON Test Data (persisted to reports-history branch)" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### 🌐 GitHub Pages:" >> $GITHUB_STEP_SUMMARY
-        echo "Reports available at: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+      - name: Test Results Summary
+        if: always()
+        run: |
+          echo "## ✅ Test Automation Workflow Completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Reports Generated:" >> $GITHUB_STEP_SUMMARY
+          echo "- Cucumber HTML Report" >> $GITHUB_STEP_SUMMARY
+          echo "- Test Dashboard (Last 10 runs)" >> $GITHUB_STEP_SUMMARY
+          echo "- JSON Test Data (persisted to reports-history branch)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🌐 GitHub Pages:" >> $GITHUB_STEP_SUMMARY
+          echo "Reports available at: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
