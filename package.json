@@ -1,0 +1,53 @@
+{
+  "name": "playwright-ecommerce-demo",
+  "version": "1.0.0",
+  "description": "Enterprise-level test automation framework using Playwright, TypeScript, and Cucumber.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "cucumber-js",
+    "test:headed": "cross-env HEADLESS=false cucumber-js",
+    "test:chrome": "cross-env BROWSER=chromium cucumber-js",
+    "test:chrome:headed": "cross-env HEADLESS=false BROWSER=chromium cucumber-js",
+    "test:firefox": "cross-env BROWSER=firefox cucumber-js",
+    "test:firefox:headed": "cross-env HEADLESS=false BROWSER=firefox cucumber-js",
+    "test:webkit": "cross-env BROWSER=webkit cucumber-js",
+    "test:webkit:headed": "cross-env HEADLESS=false BROWSER=webkit cucumber-js",
+    "test:debug": "cross-env HEADLESS=false DEBUG=true cucumber-js",
+    "test:tags": "cucumber-js --tags",
+    "test:smoke": "cucumber-js --tags @smoke",
+    "test:e2e": "cucumber-js --tags @e2e",
+    "test:all:headless": "npm run test:chrome && npm run test:firefox && npm run test:webkit",
+    "test:all:headed": "npm run test:chrome:headed && npm run test:firefox:headed && npm run test:webkit:headed",
+    "test:ci": "cucumber-js --profile ci",
+    "test:and:report": "npm test && npm run report:generate",
+    "dashboard:generate": "node scripts/generate-dashboard.js",
+    "report:generate": "node src/support/reporter.js",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "clean": "rimraf reports test-results .nyc_output coverage"
+  },
+  "keywords": [
+    "playwright",
+    "cucumber",
+    "typescript",
+    "automation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@cucumber/cucumber": "^12.7.0",
+    "@faker-js/faker": "^10.3.0",
+    "@playwright/test": "^1.58.2",
+    "cucumber-html-reporter": "^6.0.0",
+    "dotenv": "^17.3.1",
+    "eslint": "^10.0.2",
+    "multiple-cucumber-html-reporter": "^3.10.0",
+    "prettier": "^3.8.1",
+    "rimraf": "^5.0.0",
+    "cross-env": "^7.0.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
