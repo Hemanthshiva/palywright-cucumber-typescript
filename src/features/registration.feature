@@ -1,4 +1,4 @@
-Feature: End-to-End E-commerce Flow
+Feature: Registration Flow
 
   
 
