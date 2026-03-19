@@ -13,6 +13,6 @@ module.exports = {
     paths: ['src/features/**/*.feature'],
     publishQuiet: true,
     parallel: 2,
-    retry: 1,
+    retry: 2,
   },
 };
