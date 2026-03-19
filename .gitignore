@@ -1,0 +1,96 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Test reports and artifacts
+reports/
+test-results/
+.nyc_output/
+coverage/
+*.lcov
+
+# Playwright
+/tests/
+/.auth/
+/blob-report/
+/playwright-report/
+dashboard/
+gh-pages/
+
+# Generated test data
+registeredUser.json
+*.html
+
+# GitHub Copilot agents (local configuration)
+.github/agents/
+
+# IDE and Editor
+.vscode/
+.idea/
+.zencoder/
+.zenflow/
+*.swp
+*.swo
+*.swn
+*~
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Cache
+.cache/
+.eslintcache
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# MacOS
+.AppleDouble
+.LSOverride
+
+# TypeScript
+*.js.map
+*.d.ts.map
+.playwright-mcp/
